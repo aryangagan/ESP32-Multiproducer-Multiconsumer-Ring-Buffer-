@@ -46,20 +46,39 @@ Stage 1: Single-Context Ring Buffer.
 •	Applied a head, tail and count based using FIFO ring buffer.
 •	No RTOS involved
 •	Verified push and pop logic
+
+
+
 <img width="1455" height="1033" alt="Screenshot 2026-02-08 164455" src="https://github.com/user-attachments/assets/60502c3c-63d0-4e69-8228-b70e2febed1a" />
+
+
+
+
 
 Stage 2: Single, producer - Single, consumer.
 •	Added FreeRTOS tasks
 •	A consumer task and a producer task.
 •	Noted simultaneous behavior.
+
+
+
+
 <img width="1461" height="1037" alt="Screenshot 2026-02-08 164431" src="https://github.com/user-attachments/assets/0b00345a-4ba9-4af7-a119-c907b4201d18" />
+
+
 
 
 Stage 3: Mutex Protection
 •	Added mutex in protection of the ring buffer.
 •	Concurrent access resulted in removed race conditions.
 
+
+
+
 <img width="1325" height="1069" alt="Screenshot 2026-02-08 164357" src="https://github.com/user-attachments/assets/468f5ad2-ccf0-450b-93e6-cfc0f7c42a01" />
+
+
+
 
 
 Stage 4: Multi Producer - Multi Consumer (Final)
@@ -68,7 +87,14 @@ Stage 4: Multi Producer - Multi Consumer (Final)
 •	Consumer waits when buffer is empty.
 •	Expanded to various manufacturers and customers.
 
+
+
+
+
 <img width="1079" height="1014" alt="Screenshot 2026-02-08 164334" src="https://github.com/user-attachments/assets/6327dbae-55d3-4721-8be0-e2d2d098ecba" />
+
+
+
 
 
 How the System Works
@@ -86,4 +112,5 @@ Technologies Used
 •	Embedded C
 
 Project Structure
+
 
