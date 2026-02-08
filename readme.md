@@ -1,116 +1,170 @@
-ESP32 Multi Producer – Multi Consumer Ring Buffer (FreeRTOS)
+# ESP32 Multi Producer – Multi Consumer Ring Buffer (FreeRTOS)
 
-About the Project
-The project involves the application of a ring buffer on ESP32 and the application of the implementation to the producer-consumer issue with the help of FreeRTOS.
+## About this project
+This project is about implementing a ring buffer on ESP32 and using it to solve the producer–consumer problem using FreeRTOS.
 
-The overall aim was to learn how multiple tasks may safely communicate data in an embedded system without corrupting data, race or waiting around.
+The main intention of doing this project was to understand how tasks in an RTOS environment can safely share data without race conditions, data corruption, or unnecessary CPU usage.
 
-This project was rolled out progressively and tested with a real ESP board of ESP-IDF.
+The project was implemented step by step and tested on a real ESP32 board using ESP-IDF.
 
-Why I Did This Project
-During my work on FreeRTOS, I realized that there were numerous examples that refer to the FreeRTOS queues explicitly with no descriptions of the processes that occur internally.  
-Therefore, I chose to put my own FIFO ring buffer and then combine it with RTOS concepts such as:
-•	tasks
-•	mutex
-•	semaphores
-•	blocking synchronization
+---
 
-This got me familiarized with the actual workings of RTOS in actual firmware.
+## Why I chose this project
+While learning FreeRTOS, I noticed that most examples directly use FreeRTOS queues.  
+Although queues are useful, they hide a lot of internal working.
 
-Problem Statement
-In embedded systems a single task can generate data (sensor, communication, etc.).
-that data may be consumed by another task.
-There is a tendency that producers and consumers do not run in the same speed.
+So I wanted to:
+- understand how FIFO buffers work internally
+- see how mutexes and semaphores are actually used
+- handle producer–consumer synchronization manually
+- gain confidence in writing concurrent embedded code
 
-In case shared memory is accessed unprotected:
-race conditions occur
-data can be erased or lost.
+This project helped me understand how real firmware handles shared data.
 
-The difficulty was to come up with a system in which:
-more than one producer and consumer can be run simultaneously.
-data order is preserved (FIFO)
-tasks are blocked in a good way and not wasted on the CPU.
+---
 
-Solution Overview
+## Problem statement
+In embedded systems:
+- one or more tasks may produce data
+- one or more tasks may consume data
+- producers and consumers often run at different speeds
+
+If shared memory is accessed without protection:
+- race conditions can occur
+- data may be overwritten
+- system behaviour becomes unpredictable
+
+The problem was to design a system where:
+- multiple producers and consumers can run together
+- data order is preserved (FIFO)
+- tasks block properly instead of busy waiting
+- no data corruption occurs
+
+---
+
+## Solution overview
 The solution consists of:
-•	a predetermined size ring buffer
-•	Producers and consumer tasks in FreeRTOS.
-•	a mutual exclusion to share information.
-•	using semaphores to implement buffer full/empty conditions.
-This enables safe multi-producer, multi consumer communication.
+- a fixed-size ring buffer (FIFO)
+- FreeRTOS producer and consumer tasks
+- a mutex to protect shared buffer access
+- counting semaphores to handle buffer full and empty conditions
 
-Implementation Stages
-I completed this project in four phases:
+This allows safe multi-producer multi-consumer communication.
 
-Stage 1: Single-Context Ring Buffer.
-•	Applied a head, tail and count based using FIFO ring buffer.
-•	No RTOS involved
-•	Verified push and pop logic
+---
 
+## Implementation approach (how I built it)
+I implemented the project in stages so that each concept was clear.
 
+Stage 1:
+- Implemented ring buffer logic using head, tail and count
+- Tested push and pop operations without RTOS
+  
+<img width="1455" height="1033" alt="Screenshot 2026-02-08 164455" src="https://github.com/user-attachments/assets/c01d3e70-8770-4fad-abed-a35ff840b721" />
 
-<img width="1455" height="1033" alt="Screenshot 2026-02-08 164455" src="https://github.com/user-attachments/assets/60502c3c-63d0-4e69-8228-b70e2febed1a" />
+---
+Stage 2:
+- Added FreeRTOS
+- Created one producer task and one consumer task
+- Observed basic concurrent behaviour
 
+<img width="1461" height="1037" alt="Screenshot 2026-02-08 164431" src="https://github.com/user-attachments/assets/3e2a32f6-d797-4d55-8ccb-185db9a2fea1" />
 
-
-
-
-Stage 2: Single, producer - Single, consumer.
-•	Added FreeRTOS tasks
-•	A consumer task and a producer task.
-•	Noted simultaneous behavior.
-
-
-
-
-<img width="1461" height="1037" alt="Screenshot 2026-02-08 164431" src="https://github.com/user-attachments/assets/0b00345a-4ba9-4af7-a119-c907b4201d18" />
+---
 
 
+Stage 3:
+- Added a mutex to protect the ring buffer
+- Fixed race conditions caused by simultaneous access
 
+  <img width="1325" height="1069" alt="Screenshot 2026-02-08 164357" src="https://github.com/user-attachments/assets/db15ad49-f878-4d6f-80ab-2fffb916433f" />
 
-Stage 3: Mutex Protection
-•	Added mutex in protection of the ring buffer.
-•	Concurrent access resulted in removed race conditions.
+---
 
+Stage 4 (final stage):
+- Added counting semaphores
+- Producer blocks when buffer is full
+- Consumer blocks when buffer is empty
+- Extended design to multiple producers and consumers
 
+  
+ <img width="1079" height="1014" alt="Screenshot 2026-02-08 164334" src="https://github.com/user-attachments/assets/968fb884-2c81-4929-aff7-781d1fbed42f" />
 
+---
 
-<img width="1325" height="1069" alt="Screenshot 2026-02-08 164357" src="https://github.com/user-attachments/assets/468f5ad2-ccf0-450b-93e6-cfc0f7c42a01" />
+## How the system works
+- Producer waits until there is space in the buffer
+- Producer takes mutex and writes data
+- Producer releases mutex and signals consumer
+- Consumer waits until data is available
+- Consumer takes mutex and reads data
+- FIFO order is maintained
+- Tasks block efficiently instead of polling
 
+---
 
+## Technologies used
+- ESP32
+- ESP-IDF
+- FreeRTOS
+- Embedded C
 
+---
 
+## Source files
+The project contains:
+- application logic with producer and consumer tasks
+- ring buffer implementation
+- ring buffer header definitions
+- CMake configuration files
 
-Stage 4: Multi Producer - Multi Consumer (Final)
-•	Added counting semaphores
-•	Producer stops in case of a full buffer.
-•	Consumer waits when buffer is empty.
-•	Expanded to various manufacturers and customers.
+---
 
+## How to build and run
+Steps followed:
+- Install ESP-IDF
+- Connect ESP32 board
+- Build the project using idf.py
+- Flash the firmware
+- Monitor serial output
 
+Commands used:
+- idf.py build
+- idf.py flash
+- idf.py monitor
 
+---
 
+## Sample output
+Typical output looks like this:
+Producer 1 pushed data  
+Producer 2 pushed data  
+Consumer 1 received data  
+Consumer 2 received data  
 
-<img width="1079" height="1014" alt="Screenshot 2026-02-08 164334" src="https://github.com/user-attachments/assets/6327dbae-55d3-4721-8be0-e2d2d098ecba" />
+This confirms:
+- FIFO behaviour
+- correct synchronization
+- safe concurrent access
 
+---
 
+## What I learned from this project
+- How ring buffers work internally
+- Difference between mutex and semaphore
+- How blocking works in FreeRTOS
+- How RTOS scheduler interacts with synchronization
+- Writing safe concurrent embedded firmware
 
+---
 
+## Possible improvements
+- ISR to task communication
+- Performance comparison with FreeRTOS queues
+- Support for variable-sized data
 
-How the System Works
-•	Manufacturers do not put products into the store until there is no space.
-•	Before the access to the buffer, Mutex is acquired.
-•	Writing of data is made to the ring buffer.
-•	Consumers are waiting till the information appears.
-•	FIFO order is preserved
-•	Tasks are blocking rather than polling.
+---
 
-Technologies Used
-•	ESP32
-•	ESP-IDF
-•	FreeRTOS
-•	Embedded C
-
-Project Structure
-
-
+## Author
+Aryan Gagan  
+Embedded systems | ESP32 | FreeRTOS
